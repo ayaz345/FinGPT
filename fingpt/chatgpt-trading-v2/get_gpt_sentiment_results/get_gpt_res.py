@@ -37,7 +37,7 @@ def get_gpt_res(sentences):
         time.sleep(10)
         return "error"
 def save_dict(dic,evo):
-    with open(f"res/evo.pkl","wb") as f:
+    with open("res/evo.pkl", "wb") as f:
         pickle.dump(dic,f)
 
 
@@ -49,9 +49,7 @@ while len(sentences)>0:
     save_dict(res_dict,evo)
     to_predict = sentences[:20]
     res = get_gpt_res(to_predict)
-    if res == "error":
-        pass
-    else:
+    if res != "error":
         for i in range(len(to_predict)):
             res_dict[to_predict[i]] = res[i]
         if len(sentences)>20:

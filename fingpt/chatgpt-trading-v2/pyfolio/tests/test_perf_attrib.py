@@ -43,7 +43,7 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
     tickers = ['AAPL', 'TLT', 'XOM']
-    styles = ['factor{}'.format(i) for i in range(num_styles)]
+    styles = [f'factor{i}' for i in range(num_styles)]
 
     returns = pd.Series(index=dts,
                         data=np.random.randn(periods)) / 100
@@ -373,15 +373,16 @@ class PerfAttribTestCase(unittest.TestCase):
             factor_loadings_missing_dates = factor_loadings.drop(missing_dates)
 
             exposures, perf_attrib_data =\
-                perf_attrib(returns,
+                    perf_attrib(returns,
                             positions,
                             factor_returns,
                             factor_loadings_missing_dates)
 
             self.assertEqual(len(w), 2)
-            self.assertIn("Could not find factor loadings for "
-                          "{} dates".format(len(missing_dates)),
-                          str(w[-1].message))
+            self.assertIn(
+                f"Could not find factor loadings for {len(missing_dates)} dates",
+                str(w[-1].message),
+            )
 
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
@@ -396,9 +397,10 @@ class PerfAttribTestCase(unittest.TestCase):
             )
 
             self.assertEqual(len(w), 3)
-            self.assertIn("Could not find factor loadings for "
-                          "{} dates".format(len(missing_dates)),
-                          str(w[-1].message))
+            self.assertIn(
+                f"Could not find factor loadings for {len(missing_dates)} dates",
+                str(w[-1].message),
+            )
 
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
@@ -406,10 +408,10 @@ class PerfAttribTestCase(unittest.TestCase):
 
             # test missing stocks and dates
             factor_loadings_missing_both =\
-                factor_loadings_missing_dates.drop('TLT', level='ticker')
+                    factor_loadings_missing_dates.drop('TLT', level='ticker')
 
             exposures, perf_attrib_data =\
-                perf_attrib(returns,
+                    perf_attrib(returns,
                             positions,
                             factor_returns,
                             factor_loadings_missing_both)
@@ -419,9 +421,10 @@ class PerfAttribTestCase(unittest.TestCase):
                           "['TLT']", str(w[-2].message))
             self.assertIn("Ratio of assets missing: 0.333", str(w[-2].message))
 
-            self.assertIn("Could not find factor loadings for "
-                          "{} dates".format(len(missing_dates)),
-                          str(w[-1].message))
+            self.assertIn(
+                f"Could not find factor loadings for {len(missing_dates)} dates",
+                str(w[-1].message),
+            )
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
                 self.assertNotIn(date, perf_attrib_data.index)
@@ -435,7 +438,7 @@ class PerfAttribTestCase(unittest.TestCase):
                                          "No factor loadings were available"):
 
                 exposures, perf_attrib_data =\
-                    perf_attrib(returns,
+                        perf_attrib(returns,
                                 positions,
                                 factor_returns,
                                 empty_factor_loadings)

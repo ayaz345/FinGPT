@@ -90,10 +90,7 @@ def format_asset(asset):
     except ImportError:
         return asset
 
-    if isinstance(asset, zipline.assets.Asset):
-        return asset.symbol
-    else:
-        return asset
+    return asset.symbol if isinstance(asset, zipline.assets.Asset) else asset
 
 
 def vectorize(func):
@@ -207,14 +204,16 @@ def print_table(table,
         # Count the number of columns for the text to span
         n_cols = html.split('<thead>')[1].split('</thead>')[0].count('<th>')
 
-        # Generate the HTML for the extra rows
-        rows = ''
-        for name, value in header_rows.items():
-            rows += ('\n    <tr style="text-align: right;"><th>%s</th>' +
-                     '<td colspan=%d>%s</td></tr>') % (name, n_cols, value)
-
+        rows = ''.join(
+            (
+                '\n    <tr style="text-align: right;"><th>%s</th>'
+                + '<td colspan=%d>%s</td></tr>'
+            )
+            % (name, n_cols, value)
+            for name, value in header_rows.items()
+        )
         # Inject the new HTML
-        html = html.replace('<thead>', '<thead>' + rows)
+        html = html.replace('<thead>', f'<thead>{rows}')
 
     display(HTML(html))
 
@@ -292,17 +291,16 @@ def check_intraday(estimate, returns, positions, transactions):
     """
 
     if estimate == 'infer':
-        if positions is not None and transactions is not None:
-            if detect_intraday(positions, transactions):
-                warnings.warn('Detected intraday strategy; inferring positi' +
-                              'ons from transactions. Set estimate_intraday' +
-                              '=False to disable.')
-                return estimate_intraday(returns, positions, transactions)
-            else:
-                return positions
-        else:
+        if (
+            positions is None
+            or transactions is None
+            or not detect_intraday(positions, transactions)
+        ):
             return positions
-
+        warnings.warn('Detected intraday strategy; inferring positi' +
+                      'ons from transactions. Set estimate_intraday' +
+                      '=False to disable.')
+        return estimate_intraday(returns, positions, transactions)
     elif estimate:
         if positions is not None and transactions is not None:
             return estimate_intraday(returns, positions, transactions)
@@ -394,13 +392,12 @@ def clip_returns_to_benchmark(rets, benchmark_rets):
         benchmark returns.
     """
 
-    if (rets.index[0] < benchmark_rets.index[0]) \
-            or (rets.index[-1] > benchmark_rets.index[-1]):
-        clipped_rets = rets[benchmark_rets.index]
-    else:
-        clipped_rets = rets
-
-    return clipped_rets
+    return (
+        rets[benchmark_rets.index]
+        if (rets.index[0] < benchmark_rets.index[0])
+        or (rets.index[-1] > benchmark_rets.index[-1])
+        else rets
+    )
 
 
 def to_utc(df):
@@ -533,9 +530,5 @@ def sample_colormap(cmap_name, n_samples):
     """
     Sample a colormap from matplotlib
     """
-    colors = []
     colormap = cm.cmap_d[cmap_name]
-    for i in np.linspace(0, 1, n_samples):
-        colors.append(colormap(i))
-
-    return colors
+    return [colormap(i) for i in np.linspace(0, 1, n_samples)]

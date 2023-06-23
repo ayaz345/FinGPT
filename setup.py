@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 # Read requirements.txt, ignore comments
 try:
-    REQUIRES = list()
+    REQUIRES = []
     f = open("requirements.txt", "rb")
     for line in f.read().decode("utf-8").split("\n"):
         line = line.strip()
@@ -12,7 +12,7 @@ try:
             REQUIRES.append(line)
 except:
     print("'requirements.txt' not found!")
-    REQUIRES = list()
+    REQUIRES = []
 
 setup(
     name="FinGPT",

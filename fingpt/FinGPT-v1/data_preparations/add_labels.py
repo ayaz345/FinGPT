@@ -23,23 +23,22 @@ def add_label(x, df_price, foward_days = 5, threshold = 0.02, threshold_very = 0
     last_date = df_price[df_price.time < publish_date].iloc[-1].name
     this_date_index = last_date + 1
     next_date_index = this_date_index + foward_days
-    
+
     if next_date_index >= df_price.shape[0]-1:
         return "No data"
+    this = df_price[df_price.index == this_date_index].open.values[0]
+    next_ = df_price[df_price.index == next_date_index].open.values[0]
+    change = (next_ - this)/this
+    if change > threshold_very:
+        return "very positive"
+    elif change > threshold:
+        return "positive"
+    elif change < -threshold_very:
+        return "very negative"
+    elif change < -threshold:
+        return "negative"
     else:
-        this = df_price[df_price.index == this_date_index].open.values[0]
-        next_ = df_price[df_price.index == next_date_index].open.values[0]
-        change = (next_ - this)/this
-        if change > threshold_very:
-            return "very positive"
-        elif change > threshold:
-            return "positive"
-        elif change < -threshold_very:
-            return "very negative"
-        elif change < -threshold:
-            return "negative"
-        else:
-            return "neutral"
+        return "neutral"
 
 @logger.catch()
 def process_label(file_name, foward_days = 5, threshold = 0.02, threshold_very = 0.06):

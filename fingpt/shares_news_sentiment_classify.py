@@ -12,15 +12,15 @@ import openai
 
 
 def get_news_from_tushare(api_key: str, data_path: str = 'finance_news_from_tushare.csv') -> str:
-    start_date = '2023-02-01'
-    end_date = '2023-02-02'
-    limit_line = 200
-    if_news_or_reports = False
-
     if os.path.exists(data_path):
         df = pd.read_csv(data_path)
     else:
         pro = ts.pro_api(api_key)
+
+        start_date = '2023-02-01'
+        end_date = '2023-02-02'
+        limit_line = 200
+        if_news_or_reports = False
 
         if if_news_or_reports:
             df = pro.news(**{
@@ -61,13 +61,13 @@ def get_news_from_tushare(api_key: str, data_path: str = 'finance_news_from_tush
 
 
 def get_news_from_market_aux(api_key: str, data_path: str = 'finance_news_from_market_aux.txt'):
-    limit_line = 4
-
     if os.path.exists(data_path):
         with open(data_path, 'r') as f:
             data = json.load(f)
     else:
         conn = http.client.HTTPSConnection('api.marketaux.com')
+
+        limit_line = 4
 
         params = urllib.parse.urlencode({
             'api_token': api_key,
@@ -80,7 +80,7 @@ def get_news_from_market_aux(api_key: str, data_path: str = 'finance_news_from_m
             "language": "en",
         })
 
-        conn.request('GET', '/v1/news/all?{}'.format(params))
+        conn.request('GET', f'/v1/news/all?{params}')
 
         data = conn.getresponse()
         data = data.read().decode('utf-8')
@@ -111,16 +111,15 @@ def get_result_from_openai_davinci(api_key: str, prompt_str: str):
     # openai.api_key =
     openai.api_key = api_key  # os.getenv("OPENAI_API_KEY")
 
-    response = openai.Completion.create(
+    return openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt_str,
         temperature=0,
         max_tokens=max_tokens,
         top_p=1,
         frequency_penalty=0,
-        presence_penalty=0
+        presence_penalty=0,
     )
-    return response
 
 
 API_KEY_Tushare = ''  # https://www.tushare.pro/user/token

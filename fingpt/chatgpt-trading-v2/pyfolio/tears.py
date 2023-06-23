@@ -581,13 +581,13 @@ def create_returns_tear_sheet(returns, positions=None,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
-    if bootstrap and (benchmark_rets is not None):
+    if bootstrap:
+        if benchmark_rets is None:
+            raise ValueError('bootstrap requires passing of benchmark_rets.')
+
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
-    elif bootstrap:
-        raise ValueError('bootstrap requires passing of benchmark_rets.')
-
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
 
@@ -1030,22 +1030,23 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     max_days_by_ticker_lnd.index = (
         max_days_by_ticker_lnd.index.map(utils.format_asset))
 
-    print("Last {} trading days:".format(last_n_days))
+    print(f"Last {last_n_days} trading days:")
     utils.print_table(
         max_days_by_ticker_lnd[max_days_by_ticker_lnd.days_to_liquidate > 1])
 
     llt = capacity.get_low_liquidity_transactions(transactions, market_data)
     llt.index = llt.index.map(utils.format_asset)
 
-    print('Tickers with daily transactions consuming >{}% of daily bar \n'
-          'all backtest:'.format(trade_daily_vol_limit * 100))
+    print(
+        f'Tickers with daily transactions consuming >{trade_daily_vol_limit * 100}% of daily bar \nall backtest:'
+    )
     utils.print_table(
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days)
 
-    print("Last {} trading days:".format(last_n_days))
+    print(f"Last {last_n_days} trading days:")
     utils.print_table(
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
@@ -1151,9 +1152,7 @@ def create_perf_attrib_tear_sheet(returns,
             perf_attrib.plot_factor_contribution_to_perf(
                 perf_attrib_data[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
-                title=(
-                    'Cumulative common {} returns attribution'
-                ).format(factor_type)
+                title=f'Cumulative common {factor_type} returns attribution',
             )
             current_section += 1
 
@@ -1166,7 +1165,7 @@ def create_perf_attrib_tear_sheet(returns,
             perf_attrib.plot_risk_exposures(
                 portfolio_exposures[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
-                title='Daily {} factor exposures'.format(factor_type)
+                title=f'Daily {factor_type} factor exposures',
             )
             current_section += 1
 

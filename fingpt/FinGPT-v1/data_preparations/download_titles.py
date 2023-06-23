@@ -40,7 +40,6 @@ def get_news_data( stock ):
 
 if __name__ == "__main__":
     pool_list = []
-    res_list = []
     pool = mp.Pool(processes = 5)
 
     for i in stock_list:
@@ -50,8 +49,6 @@ if __name__ == "__main__":
     pool.close()
     pool.join()
 
-    for i in pool_list:
-        res_list.append(i.get())
-
+    res_list = [i.get() for i in pool_list]
     print("All Done!")
 

@@ -152,10 +152,12 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
     liq_desc.index.levels[0].name = 'symbol'
     liq_desc.index.levels[1].name = 'date'
 
-    worst_liq = liq_desc.reset_index().sort_values(
-        'days_to_liquidate', ascending=False).groupby('symbol').first()
-
-    return worst_liq
+    return (
+        liq_desc.reset_index()
+        .sort_values('days_to_liquidate', ascending=False)
+        .groupby('symbol')
+        .first()
+    )
 
 
 def get_low_liquidity_transactions(transactions, market_data,
@@ -241,6 +243,4 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     portfolio_value = ep.cum_returns(
         returns, starting_value=backtest_starting_capital) * mult
 
-    adj_returns = returns - (daily_penalty / portfolio_value)
-
-    return adj_returns
+    return returns - (daily_penalty / portfolio_value)
